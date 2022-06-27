@@ -1,0 +1,205 @@
+//! # Structural operations for tuples
+//!
+//! This crate implements splitting, joining and indexing tuples.
+//!
+//! The traits are implemented for tuples from zero len (ie, `()` unit) to 16.
+//!
+//! ```rust
+//! use tupleops::TupleJoin;
+//!
+//! let out = (1,'a',"b").join((1., 2.));
+//! println!("out {out:?}");
+//! ```
+//!
+//! [`TupleSplit`] does the converse. It relies on pattern matching for
+//! determining the split.
+//! ```rust
+//! use tupleops::TupleSplit;
+//!
+//! let out: (_, (_,_,_)) = (1,2,3,4,5).split();
+//! println!("out {out:?}");
+//! ```
+//!
+//! [`TupleIdx`] allows a single tuple member to be referenced. `idx` gets a
+//! reference to a field, and `extract` moves it out.
+use seq_macro::seq;
+
+/// Implement `join` for tuples.
+pub trait TupleJoin<RHS>: seal::Sealed {
+    type Output;
+
+    fn join(self, other: RHS) -> Self::Output;
+}
+
+/// Resulting type of joining tuples `L` and `R`.
+pub type TupleJoinOutput<L, R> = <L as TupleJoin<R>>::Output;
+
+/// Split a tuple into left and right portions.
+pub trait TupleSplit<LHS, RHS>: seal::Sealed {
+    fn split(self) -> (LHS, RHS);
+}
+
+/// Index an element of a tuple.
+pub trait TupleIdx<const N: usize>: seal::Sealed {
+    type Output;
+    const INDEX: usize;
+
+    fn idx(&self) -> &Self::Output;
+    fn extract(self) -> Self::Output;
+}
+
+mod seal {
+    pub trait Sealed {}
+}
+
+macro_rules! impl_tupleops {
+    (@impl $($left:ident)* ; $($right:ident)*) => {
+        impl<$($left,)* $($right,)*> TupleJoin<($($right,)*)> for ($($left,)*) {
+            type Output = ($($left,)* $($right,)*);
+
+            #[allow(clippy::unused_unit, non_snake_case)]
+            fn join(self, other: ($($right,)*)) -> Self::Output {
+                let ($($left,)*) = self;
+                let ($($right,)*) = other;
+
+                ($($left,)* $($right,)*)
+            }
+        }
+
+        impl<$($left,)* $($right,)*> TupleSplit<($($left,)*), ($($right,)*)> for ($($left,)* $($right,)*) {
+            #[allow(clippy::unused_unit, non_snake_case)]
+            fn split(self) -> (($($left,)*), ($($right,)*)) {
+                let ($($left,)* $($right,)*) = self;
+
+                (($($left,)*), ($($right,)*))
+            }
+        }
+    };
+    (@recur $($left:ident)* ; ) => {
+        impl_tupleops!(@impl $($left)* ; );
+    };
+    (@recur $($left:ident)* ; $first:ident $($rest:ident)*) => {
+        impl_tupleops!(@impl $($left)* ; $first $($rest)*);
+        impl_tupleops!(@recur $($left)* $first ; $($rest)*);
+    };
+    ($($types:ident)*) => {
+        impl_tupleops!(@recur ; $($types)*);
+    };
+}
+
+macro_rules! tuple_impl {
+    ($low:literal, $high:literal) => {
+        // N - total tuple length
+        // This is N^2 so N shouldm't be too large.
+        seq!(N in $low..=$high {
+            #(
+                seq!(J in 0..N {
+                    impl<#(T~J,)*> seal::Sealed for (#(T~J,)*) {}
+
+                    impl_tupleops!(#(T~J)*);
+
+                    seq!(I in 0..N {
+                        impl<#(T~J,)*> TupleIdx<I> for (#(T~J,)*) {
+                            type Output = T~I;
+                            const INDEX: usize = I;
+
+                            #[allow(non_snake_case, unused_variables)]
+                            fn idx(&self) -> &Self::Output {
+                                let (#(T~J,)*) = self;
+                                T~I
+                            }
+
+                            #[allow(non_snake_case, unused_variables)]
+                            fn extract(self) -> Self::Output {
+                                let (#(T~J,)*) = self;
+                                T~I
+                            }
+                        }
+                    });
+                });
+            )*
+        });
+    };
+}
+
+tuple_impl!(0, 16);
+#[cfg(any(feature = "tuple_32", feature = "tuple_24", feature = "tuple_20"))]
+tuple_impl!(17, 20);
+#[cfg(any(feature = "tuple_32", feature = "tuple_24"))]
+tuple_impl!(21, 24);
+#[cfg(any(feature = "tuple_32"))]
+tuple_impl!(25, 32);
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn join() {
+        assert_eq!((1,).join((2,)), (1, 2));
+        assert_eq!((1, 'a',).join((2, 'b',)), (1, 'a', 2, 'b'));
+    }
+
+    #[test]
+    fn join_nil() {
+        assert_eq!(().join(()), ());
+        assert_eq!((1,).join(()), (1,));
+        assert_eq!(().join((1,)), (1,));
+    }
+
+    #[test]
+    fn split() {
+        let ((a, b), rest) = (1, 'a', 2, 'b').split();
+
+        assert_eq!(a, 1);
+        assert_eq!(b, 'a');
+        assert_eq!(rest, (2, 'b'));
+    }
+
+    #[test]
+    fn split_nil() {
+        let ((), ()) = ().split();
+        let ((_,), ()) = (1,).split();
+        let ((), (_,)) = (1,).split();
+    }
+
+    #[test]
+    fn index() {
+        let a: &char = TupleIdx::<1>::idx(&(1, 'a'));
+
+        assert_eq!(*a, 'a');
+    }
+
+    #[test]
+    fn extract() {
+        let a: char = TupleIdx::<1>::extract((1, 'a'));
+
+        assert_eq!(a, 'a');
+    }
+
+    #[test]
+    fn boundaries() {
+        let seq!(N in 0..16 { (#(_~N,)*) }) =
+            seq!(I in 0..8 { (#(I,)*) }).join(seq!(J in 0..8 { (#(J,)*) }));
+        #[cfg(any(feature = "tuple_20", feature = "tuple_24", feature = "tuple_28", feature = "tuple_32"))]
+        {
+            let seq!(N in 0..20 { (#(_~N,)*) }) =
+                seq!(I in 0..10 { (#(I,)*) }).join(seq!(J in 0..10 { (#(J,)*) }));
+        }
+        #[cfg(any(feature = "tuple_24", feature = "tuple_28", feature = "tuple_32"))]
+        {
+            let seq!(N in 0..24 { (#(_~N,)*) }) =
+                seq!(I in 0..12 { (#(I,)*) }).join(seq!(J in 0..12 { (#(J,)*) }));
+        }
+        #[cfg(any(feature = "tuple_28", feature = "tuple_32"))]
+        {
+            let seq!(N in 0..28 { (#(_~N,)*) }) =
+                seq!(I in 0..14 { (#(I,)*) }).join(seq!(J in 0..14 { (#(J,)*) }));
+        }
+        #[cfg(any(feature = "tuple_32"))]
+        {
+            let seq!(N in 0..32 { (#(_~N,)*) }) =
+                seq!(I in 0..16 { (#(I,)*) }).join(seq!(J in 0..16 { (#(J,)*) }));
+        }
+    }
+}
