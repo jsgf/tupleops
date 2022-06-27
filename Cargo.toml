@@ -1,8 +1,8 @@
 [package]
-name = "tupleops"
+name = "tuplestructops"
 version = "0.1.0"
 edition = "2021"
-authors = ["Jeremy Fitzhardonge <jeremy@goop.org>"]
+authors = ["Jeremy Fitzhardinge <jeremy@goop.org>"]
 description = "Structural manipulations for tuples"
 license = "MIT OR Apache-2.0"
 
