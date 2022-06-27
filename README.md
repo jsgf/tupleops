@@ -5,6 +5,11 @@ This crate implements three operations for tuples:
 - split
 - index
 
-These operations are implemented via traits implemented for tuples up to a limit
-of 16 - the implementations are O(N^2), so it's worth bounding the tuple size to
-keep compilation time under control.
+The implementations are O(N^2) in the number of tuple elements. By default
+they're implemented for up to 16 elements, but the additional
+- tuple_20
+- tuple_24
+- tuple_28
+- tuple_32
+
+features allow the traits to be implemnented for more elements.
