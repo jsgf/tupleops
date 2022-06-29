@@ -28,6 +28,7 @@ use seq_macro::seq;
 ///
 /// `Self` is the left side of the join, and right is the `RHS` type parameter.
 pub trait TupleJoin<RHS>: seal::Sealed {
+    /// Joined output type.
     type Output;
 
     /// Join two tuples, consuming both. `self` is the left (prefix) and `other`
@@ -65,11 +66,13 @@ pub trait TupleSplit<LHS, RHS>: seal::Sealed {
 
 /// Index an element of a tuple.
 pub trait TupleIdx<const N: usize>: seal::Sealed {
+    /// Indexed element type.
     type Output;
+    /// Index.
     const INDEX: usize;
 
-    fn idx(&self) -> &Self::Output;
-    fn extract(self) -> Self::Output;
+    /// Return a tuple element.
+    fn idx(self) -> Self::Output;
 }
 
 mod seal {
@@ -78,6 +81,7 @@ mod seal {
 
 macro_rules! impl_tupleops {
     (@impl $($left:ident)* ; $($right:ident)*) => {
+        // Join by value
         impl<$($left,)* $($right,)*> TupleJoin<($($right,)*)> for ($($left,)*) {
             type Output = ($($left,)* $($right,)*);
 
@@ -90,9 +94,33 @@ macro_rules! impl_tupleops {
             }
         }
 
+        // Join by reference
+        impl<'a, $($left,)* $($right,)*> TupleJoin<&'a ($($right,)*)> for &'a ($($left,)*) {
+            type Output = ($(&'a $left,)* $(&'a $right,)*);
+
+            #[allow(clippy::unused_unit, non_snake_case)]
+            fn join(self, other: &'a ($($right,)*)) -> Self::Output {
+                let ($($left,)*) = self;
+                let ($($right,)*) = other;
+
+                ($($left,)* $($right,)*)
+            }
+        }
+
+        // Split by value
         impl<$($left,)* $($right,)*> TupleSplit<($($left,)*), ($($right,)*)> for ($($left,)* $($right,)*) {
             #[allow(clippy::unused_unit, non_snake_case)]
             fn split(self) -> (($($left,)*), ($($right,)*)) {
+                let ($($left,)* $($right,)*) = self;
+
+                (($($left,)*), ($($right,)*))
+            }
+        }
+
+        // Split by reference
+        impl<'a, $($left,)* $($right,)*> TupleSplit<($(&'a $left,)*), ($(&'a $right,)*)> for &'a ($($left,)* $($right,)*) {
+            #[allow(clippy::unused_unit, non_snake_case)]
+            fn split(self) -> (($(&'a $left,)*), ($(&'a $right,)*)) {
                 let ($($left,)* $($right,)*) = self;
 
                 (($($left,)*), ($($right,)*))
@@ -119,22 +147,30 @@ macro_rules! tuple_impl {
             #(
                 seq!(J in 0..N {
                     impl<#(T~J,)*> seal::Sealed for (#(T~J,)*) {}
+                    impl<'a, #(T~J,)*> seal::Sealed for &'a (#(T~J,)*) {}
 
                     impl_tupleops!(#(T~J)*);
 
                     seq!(I in 0..N {
+                        // Index by value
                         impl<#(T~J,)*> TupleIdx<I> for (#(T~J,)*) {
                             type Output = T~I;
                             const INDEX: usize = I;
 
                             #[allow(non_snake_case, unused_variables)]
-                            fn idx(&self) -> &Self::Output {
+                            fn idx(self) -> Self::Output {
                                 let (#(T~J,)*) = self;
                                 T~I
                             }
+                        }
+
+                        // Index by reference
+                        impl<'a, #(T~J,)*> TupleIdx<I> for &'a (#(T~J,)*) {
+                            type Output = &'a T~I;
+                            const INDEX: usize = I;
 
                             #[allow(non_snake_case, unused_variables)]
-                            fn extract(self) -> Self::Output {
+                            fn idx(self) -> Self::Output {
                                 let (#(T~J,)*) = self;
                                 T~I
                             }
@@ -163,6 +199,12 @@ mod test {
     }
 
     #[test]
+    fn join_ref() {
+        assert_eq!((&(1,)).join(&(2,)), (&1, &2));
+        assert_eq!((&(1, 'a',)).join(&(2, 'b',)), (&1, &'a', &2, &'b'));
+    }
+
+    #[test]
     fn join_nil() {
         assert_eq!(().join(()), ());
         assert_eq!((1,).join(()), (1,));
@@ -179,6 +221,15 @@ mod test {
     }
 
     #[test]
+    fn split_ref() {
+        let ((a, b), rest) = (&(1, 'a', 2, 'b')).split();
+
+        assert_eq!(a, &1);
+        assert_eq!(b, &'a');
+        assert_eq!(rest, (&2, &'b'));
+    }
+
+    #[test]
     fn split_nil() {
         let ((), ()) = ().split();
         let ((_,), ()) = (1,).split();
@@ -190,13 +241,6 @@ mod test {
         let a: &char = TupleIdx::<1>::idx(&(1, 'a'));
 
         assert_eq!(*a, 'a');
-    }
-
-    #[test]
-    fn extract() {
-        let a: char = TupleIdx::<1>::extract((1, 'a'));
-
-        assert_eq!(a, 'a');
     }
 
     #[test]
