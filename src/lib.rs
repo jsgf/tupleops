@@ -5,7 +5,7 @@
 //! The traits are implemented for tuples from zero len (ie, `()` unit) to 16.
 //!
 //! ```rust
-//! use tupleops::TupleJoin;
+//! use tuplestructops::TupleJoin;
 //!
 //! let out = (1,'a',"b").join((1., 2.));
 //! println!("out {out:?}");
@@ -14,7 +14,7 @@
 //! [`TupleSplit`] does the converse. It relies on pattern matching for
 //! determining the split.
 //! ```rust
-//! use tupleops::TupleSplit;
+//! use tuplestructops::TupleSplit;
 //!
 //! let out: (_, (_,_,_)) = (1,2,3,4,5).split();
 //! println!("out {out:?}");
