@@ -5,6 +5,16 @@ This crate implements three operations for tuples:
 - split
 - index
 
+For example, you can simply concatenate two tuples with:
+```rust
+use tuplestructops::TupleJoin;
+
+let concat = (1, 'b', 3).join(('a', 5, 'c'));
+```
+
+This crate focuses purely on the overall structure of tuples, and is completely
+agnostic to the types of their elements.
+
 The implementations are O(N^2) in the number of tuple elements. By default
 they're implemented for up to 16 elements, but the additional
 - tuple_20
@@ -12,4 +22,4 @@ they're implemented for up to 16 elements, but the additional
 - tuple_28
 - tuple_32
 
-features allow the traits to be implemnented for more elements.
+features allow the traits to be implemented for more elements.

@@ -1,10 +1,12 @@
 [package]
 name = "tuplestructops"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Jeremy Fitzhardinge <jeremy@goop.org>"]
 description = "Structural manipulations for tuples"
 license = "MIT OR Apache-2.0"
+repository = "https://github.com/jsgf/tuplestructops"
+documentation = "https://docs.rs/tuplestructops/0.1.0/tuplestructops/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
