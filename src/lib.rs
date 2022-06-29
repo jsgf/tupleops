@@ -90,7 +90,7 @@ macro_rules! impl_tupleops {
 macro_rules! tuple_impl {
     ($low:literal, $high:literal) => {
         // N - total tuple length
-        // This is N^2 so N shouldm't be too large.
+        // This is N^2 so N shouldn't be too large.
         seq!(N in $low..=$high {
             #(
                 seq!(J in 0..N {
