@@ -1,6 +1,6 @@
 //! # Structural operations for tuples
 //!
-//! This crate implements splitting, joining and indexing tuples.
+//! This crate implements splitting and joining tuples.
 //!
 //! The traits are implemented for tuples from zero len (ie, `()` unit) to 16.
 //! (More with with the `tuple_24` and `tuple_32` features enabled.)
@@ -24,8 +24,6 @@
 //! let out: (_, (_,_,_)) = (1,2,3,4,5).split();
 //! println!("out {out:?}");
 //! ```
-//!
-//! [`TupleIdx`] allows a single tuple member to be referenced with `idx`.
 use seq_macro::seq;
 
 #[cfg(test)]
@@ -84,27 +82,6 @@ pub trait TupleSplit<LHS, RHS>: seal::Sealed {
     /// Note that in this example `sometuple` can be any tuple type so long as
     /// it has at least three fields.
     fn split(self) -> (LHS, RHS);
-}
-
-/// Index an element of a tuple. The index is a type-level constant, which allows any heterogeneous
-pub trait TupleIdx<const N: usize>: seal::Sealed {
-    /// Indexed element type.
-    type Output;
-    /// Index.
-    const INDEX: usize;
-
-    /// Return a tuple element.
-    fn idx(self) -> Self::Output;
-}
-
-/// Helper for [`TupleIdx`] which makes it a bit easier to express.
-///
-/// ```rust
-/// # use tuplestructops::tuple_idx;
-/// let a: char = tuple_idx::<1, _>((1, 'a', 2.3));
-/// ```
-pub fn tuple_idx<const N: usize, T: TupleIdx<N>>(tup: T) -> T::Output {
-    tup.idx()
 }
 
 mod seal {

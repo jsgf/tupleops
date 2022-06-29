@@ -47,15 +47,6 @@ fn split_nil() {
 }
 
 #[test]
-fn index() {
-    let a: &char = TupleIdx::<1>::idx(&(1, 'a'));
-
-    assert_eq!(*a, 'a');
-
-    assert_eq!(tuple_idx::<1, _>((1, 'a')), 'a');
-}
-
-#[test]
 fn boundaries() {
     let seq!(N in 0..16 { (#(_~N,)*) }) =
         seq!(I in 0..8 { (#(I,)*) }).join(seq!(J in 0..8 { (#(J,)*) }));

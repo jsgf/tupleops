@@ -75,34 +75,6 @@ macro_rules! tuple_impl {
                     impl<'a, #(T~J,)*> seal::Sealed for &'a (#(T~J,)*) {}
 
                     impl_tupleops!(#(T~J)*);
-
-                    seq!(I in 0..N {
-                        // Index by value
-                        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
-                        impl<#(T~J,)*> TupleIdx<I> for (#(T~J,)*) {
-                            type Output = T~I;
-                            const INDEX: usize = I;
-
-                            #[allow(non_snake_case, unused_variables)]
-                            fn idx(self) -> Self::Output {
-                                let (#(T~J,)*) = self;
-                                T~I
-                            }
-                        }
-
-                        // Index by reference
-                        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
-                        impl<'a, #(T~J,)*> TupleIdx<I> for &'a (#(T~J,)*) {
-                            type Output = &'a T~I;
-                            const INDEX: usize = I;
-
-                            #[allow(non_snake_case, unused_variables)]
-                            fn idx(self) -> Self::Output {
-                                let (#(T~J,)*) = self;
-                                T~I
-                            }
-                        }
-                    });
                 });
             )*
         });
