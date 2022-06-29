@@ -108,6 +108,7 @@ mod seal {
 macro_rules! impl_tupleops {
     (@impl $($left:ident)* ; $($right:ident)*) => {
         // Join by value
+        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
         impl<$($left,)* $($right,)*> TupleJoin<($($right,)*)> for ($($left,)*) {
             type Output = ($($left,)* $($right,)*);
 
@@ -121,6 +122,7 @@ macro_rules! impl_tupleops {
         }
 
         // Join by reference
+        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
         impl<'a, $($left,)* $($right,)*> TupleJoin<&'a ($($right,)*)> for &'a ($($left,)*) {
             type Output = ($(&'a $left,)* $(&'a $right,)*);
 
@@ -134,6 +136,7 @@ macro_rules! impl_tupleops {
         }
 
         // Split by value
+        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
         impl<$($left,)* $($right,)*> TupleSplit<($($left,)*), ($($right,)*)> for ($($left,)* $($right,)*) {
             #[allow(clippy::unused_unit, non_snake_case)]
             fn split(self) -> (($($left,)*), ($($right,)*)) {
@@ -144,6 +147,7 @@ macro_rules! impl_tupleops {
         }
 
         // Split by reference
+        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
         impl<'a, $($left,)* $($right,)*> TupleSplit<($(&'a $left,)*), ($(&'a $right,)*)> for &'a ($($left,)* $($right,)*) {
             #[allow(clippy::unused_unit, non_snake_case)]
             fn split(self) -> (($(&'a $left,)*), ($(&'a $right,)*)) {
@@ -179,6 +183,7 @@ macro_rules! tuple_impl {
 
                     seq!(I in 0..N {
                         // Index by value
+                        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
                         impl<#(T~J,)*> TupleIdx<I> for (#(T~J,)*) {
                             type Output = T~I;
                             const INDEX: usize = I;
@@ -191,6 +196,7 @@ macro_rules! tuple_impl {
                         }
 
                         // Index by reference
+                        #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
                         impl<'a, #(T~J,)*> TupleIdx<I> for &'a (#(T~J,)*) {
                             type Output = &'a T~I;
                             const INDEX: usize = I;

@@ -14,5 +14,6 @@ documentation = "https://docs.rs/tuplestructops/"
 seq-macro = "0.3"
 
 [features]
+impl_docs = [] # generate docs for all trait implementations
 tuple_24 = [] # implement for tuples up to 24 (inclusive)
 tuple_32 = [] # implement for tuples up to 32 (inclusive)
