@@ -25,9 +25,22 @@
 use seq_macro::seq;
 
 /// Implement `join` for tuples.
+///
+/// `Self` is the left side of the join, and right is the `RHS` type parameter.
 pub trait TupleJoin<RHS>: seal::Sealed {
     type Output;
 
+    /// Join two tuples, consuming both. `self` is the left (prefix) and `other`
+    /// is the right (suffix).
+    /// ```rust
+    /// # use tuplestructops::TupleJoin;
+    /// let out: (_, _, _, _, _, _) = (1, 2, 3).join(('a', 'b', 'c'));
+    /// ```
+    /// Joining unit `()` tuples has no effect.
+    /// ```rust
+    /// # use tuplestructops::TupleJoin;
+    /// assert_eq!(().join((1, 2, 3)), (1, 2, 3));
+    /// ```
     fn join(self, other: RHS) -> Self::Output;
 }
 
@@ -36,6 +49,17 @@ pub type TupleJoinOutput<L, R> = <L as TupleJoin<R>>::Output;
 
 /// Split a tuple into left and right portions.
 pub trait TupleSplit<LHS, RHS>: seal::Sealed {
+    /// The left (prefix) and right (suffix) portions are defined by the `LHS`
+    /// and `RHS` trait type parameters. When invoking `split`, these will
+    /// generally be inferred by the calling context. For example, to split the
+    /// last three fields off a tuple, one can use:
+    /// ```rust
+    /// # use tuplestructops::TupleSplit;
+    /// let sometuple = (1, 2, 3, 4, 5, 'a', 'b', 'c');
+    /// let ((left), (a, b, c)) = sometuple.split();
+    /// ```
+    /// Note that in this example `sometuple` can be any tuple type so long as
+    /// it has at least three fields.
     fn split(self) -> (LHS, RHS);
 }
 
