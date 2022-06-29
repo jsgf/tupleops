@@ -220,6 +220,7 @@ tuple_impl!(17, 24);
 #[cfg(any(feature = "tuple_32"))]
 tuple_impl!(25, 32);
 
+#[allow(clippy::unit_cmp, clippy::just_underscores_and_digits)]
 #[cfg(test)]
 mod test {
     use super::*;
