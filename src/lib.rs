@@ -75,6 +75,11 @@ pub trait TupleIdx<const N: usize>: seal::Sealed {
     fn idx(self) -> Self::Output;
 }
 
+/// Helper for [`TupleIdx`] which makes it a bit easier to express.
+pub fn tuple_idx<const N: usize, T: TupleIdx<N>>(tup: T) -> T::Output {
+    tup.idx()
+}
+
 mod seal {
     pub trait Sealed {}
 }
@@ -241,6 +246,8 @@ mod test {
         let a: &char = TupleIdx::<1>::idx(&(1, 'a'));
 
         assert_eq!(*a, 'a');
+
+        assert_eq!(tuple_idx::<1, _>((1, 'a')), 'a');
     }
 
     #[test]
