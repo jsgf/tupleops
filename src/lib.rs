@@ -5,7 +5,7 @@
 //! The traits are implemented for tuples from zero len (ie, `()` unit) to 16.
 //! (More with with the `tuple_24` and `tuple_32` features enabled.)
 //!
-//! They are implenented for both tuples by value and references, which either
+//! They are implemented for both tuples by value and reference, which either
 //! consume or borrow their inputs respectively.
 //!
 //! An example of [`TupleJoin`] by value:
@@ -16,8 +16,8 @@
 //! println!("out {out:?}");
 //! ```
 //!
-//! [`TupleSplit`] does the converse. It relies on pattern matching for
-//! determining the split.
+//! [`TupleSplit`] does the converse. It relies on pattern matching to determine
+//! the split.
 //! ```rust
 //! use tuplestructops::TupleSplit;
 //!
@@ -55,7 +55,8 @@ pub trait TupleJoin<RHS>: seal::Sealed {
     fn join(self, other: RHS) -> Self::Output;
 }
 
-/// Resulting type of joining tuples `L` and `R`. This is useful for referencing it in other type contexts. For example:
+/// Resulting type of joining tuples `L` and `R`. This is useful for referencing
+/// it in other type contexts. For example:
 /// ```rust
 /// # use std::path::PathBuf;
 /// # use tuplestructops::{TupleJoin, TupleJoinOutput};
@@ -78,14 +79,14 @@ pub trait TupleSplit<LHS, RHS>: seal::Sealed {
     /// ```rust
     /// # use tuplestructops::TupleSplit;
     /// let sometuple = (1, 2, 3, 4, 5, 'a', 'b', 'c');
-    /// let ((left), (a, b, c)) = sometuple.split();
+    /// let (left, (a, b, c)) = sometuple.split();
     /// ```
     /// Note that in this example `sometuple` can be any tuple type so long as
     /// it has at least three fields.
     fn split(self) -> (LHS, RHS);
 }
 
-/// Index an element of a tuple.
+/// Index an element of a tuple. The index is a type-level constant, which allows any heterogeneous
 pub trait TupleIdx<const N: usize>: seal::Sealed {
     /// Indexed element type.
     type Output;

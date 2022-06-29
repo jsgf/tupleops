@@ -21,3 +21,6 @@ they're implemented for up to 16 elements, but the additional
 - tuple_32
 
 features allow the traits to be implemented for more elements.
+
+The `impl_docs` feature enables documentation of the trait implementations for
+all the tuple types. It is disabled by default since it's very repetitive.
