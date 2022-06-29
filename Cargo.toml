@@ -14,7 +14,5 @@ documentation = "https://docs.rs/tuplestructops/"
 seq-macro = "0.3"
 
 [features]
-tuple_20 = [] # implement for tuples up to 20 (inclusive)
 tuple_24 = [] # implement for tuples up to 24 (inclusive)
-tuple_28 = [] # implement for tuples up to 28 (inclusive)
 tuple_32 = [] # implement for tuples up to 32 (inclusive)

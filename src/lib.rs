@@ -147,10 +147,8 @@ macro_rules! tuple_impl {
 }
 
 tuple_impl!(0, 16);
-#[cfg(any(feature = "tuple_32", feature = "tuple_24", feature = "tuple_20"))]
-tuple_impl!(17, 20);
 #[cfg(any(feature = "tuple_32", feature = "tuple_24"))]
-tuple_impl!(21, 24);
+tuple_impl!(17, 24);
 #[cfg(any(feature = "tuple_32"))]
 tuple_impl!(25, 32);
 
@@ -205,20 +203,10 @@ mod test {
     fn boundaries() {
         let seq!(N in 0..16 { (#(_~N,)*) }) =
             seq!(I in 0..8 { (#(I,)*) }).join(seq!(J in 0..8 { (#(J,)*) }));
-        #[cfg(any(feature = "tuple_20", feature = "tuple_24", feature = "tuple_28", feature = "tuple_32"))]
-        {
-            let seq!(N in 0..20 { (#(_~N,)*) }) =
-                seq!(I in 0..10 { (#(I,)*) }).join(seq!(J in 0..10 { (#(J,)*) }));
-        }
-        #[cfg(any(feature = "tuple_24", feature = "tuple_28", feature = "tuple_32"))]
+        #[cfg(any(feature = "tuple_24", feature = "tuple_32"))]
         {
             let seq!(N in 0..24 { (#(_~N,)*) }) =
                 seq!(I in 0..12 { (#(I,)*) }).join(seq!(J in 0..12 { (#(J,)*) }));
-        }
-        #[cfg(any(feature = "tuple_28", feature = "tuple_32"))]
-        {
-            let seq!(N in 0..28 { (#(_~N,)*) }) =
-                seq!(I in 0..14 { (#(I,)*) }).join(seq!(J in 0..14 { (#(J,)*) }));
         }
         #[cfg(any(feature = "tuple_32"))]
         {
