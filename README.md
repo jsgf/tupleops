@@ -1,9 +1,8 @@
 # Structural operations for Tuples
 
-This crate implements three operations for tuples:
+This crate implements two operations for tuples:
 - join
 - split
-- index
 
 For example, you can simply concatenate two tuples with:
 ```rust
@@ -24,3 +23,7 @@ features allow the traits to be implemented for more elements.
 
 The `impl_docs` feature enables documentation of the trait implementations for
 all the tuple types. It is disabled by default since it's very repetitive.
+
+## Future Work
+
+Tuple slices?
