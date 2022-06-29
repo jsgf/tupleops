@@ -1,6 +1,6 @@
 use super::*;
 
-macro_rules! impl_tupleops {
+macro_rules! impl_joinsplit {
     (@impl $($left:ident)* ; $($right:ident)*) => {
         // Join by value
         #[cfg_attr(not(feature = "impl_docs"), doc(hidden))]
@@ -53,14 +53,14 @@ macro_rules! impl_tupleops {
         }
     };
     (@recur $($left:ident)* ; ) => {
-        impl_tupleops!(@impl $($left)* ; );
+        impl_joinsplit!(@impl $($left)* ; );
     };
     (@recur $($left:ident)* ; $first:ident $($rest:ident)*) => {
-        impl_tupleops!(@impl $($left)* ; $first $($rest)*);
-        impl_tupleops!(@recur $($left)* $first ; $($rest)*);
+        impl_joinsplit!(@impl $($left)* ; $first $($rest)*);
+        impl_joinsplit!(@recur $($left)* $first ; $($rest)*);
     };
     ($($types:ident)*) => {
-        impl_tupleops!(@recur ; $($types)*);
+        impl_joinsplit!(@recur ; $($types)*);
     };
 }
 
@@ -74,7 +74,7 @@ macro_rules! tuple_impl {
                     impl<#(T~J,)*> seal::Sealed for (#(T~J,)*) {}
                     impl<'a, #(T~J,)*> seal::Sealed for &'a (#(T~J,)*) {}
 
-                    impl_tupleops!(#(T~J)*);
+                    impl_joinsplit!(#(T~J)*);
                 });
             )*
         });
